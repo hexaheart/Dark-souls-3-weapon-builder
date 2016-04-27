@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Weapon Builder</title>
+	<style>
+		body{
+			font-family: sans-serif;
+			margin: 0;
+			padding: 0;
+		}
+
+		input{
+			border: none;
+			text-align: center;
+		}
+
+		input[type=text]{
+			width: 25px;
+		}
+
+		td, th{
+			border: solid 1px silver;
+			background-color: #eee;
+			text-align: center;
+		}
+
+		th img{
+			margin: 5px 4px 0 5px;			
+		}
+
+		.brighter{
+			-webkit-filter: brightness(180%) contrast(80%);
+			filter:brightness(180%) contrast(80%);
+		}
+
+		#tab-list{
+			display: flex;
+			justify-content: center;
+			flex-wrap: wrap-reverse;
+			padding: 15px 5px 0 5px;
+			border-bottom: 2px solid #bbb;
+		}
+		#tab-list > div{
+			display: inline-block;
+			padding: 2px 4px;
+			margin: 0px 1px -2px 1px;
+			border: 2px solid #bbb;
+			cursor: pointer;
+			background-color: #bbb;
+			font-size: .8em;
+		}
+		#tab-list > div.active-tab{
+			background-color: #eee;
+			border-bottom: none;
+
+			-webkit-user-select: none;      
+			-moz-user-select: none;
+			-ms-user-select: none;
+			-o-user-select: none;
+			user-select: none;
+		}
+
+		#tab-list span{
+			font-size: 1.5em;
+			line-height: 15px;
+			padding-left: 3px;
+			font-weight: bold;
+		}
+		#tab-list span.active{
+			color: green;
+		}
+		#tab-list span.disabled{
+			color: red;
+		}
+
+		#data-container{
+			margin: 0 auto;
+		}
+
+		.spacer{
+			padding: 50px 0;
+		}
+		.light-gray{
+			background-color: #eee;
+		}
+		.gray{
+			background-color: #888;
+		}
+
+		#io-area{
+			margin: 0px auto;
+			
+			min-height: 150px;
+			height: 150px;
+			max-height: 1200px;
+
+			min-width: 600px;
+			width: 75%;
+			max-width: 1000px;
+		}
+		#io-area > textarea{
+			width: 100%;
+			resize: vertical;
+
+			min-height: 250px;
+			height: 250px;
+			max-height: 1200px;
+
+			margin-bottom: 150px;
+		}
+
+		.button{
+			padding: 10px;
+			font-size: 1.75em;	
+			background-color: #eee;
+			display: inline-block;
+			width: 250px;
+			margin: 20px 0 50px 0;
+			color: #888;
+			text-align: center;
+			font-weight: bold;
+			cursor: pointer;
+		}
+		.button:hover{
+			color: #444;
+			background-color: #ddd;
+		}
+		.button.left{
+			margin-left: 50px;
+		}
+
+		.button.right{
+			margin-right: 50px;
+		}
+
+		.button-container{
+			display: flex;
+			justify-content: space-around;
+		}
+
+		.hide{
+			display: none;
+		}
+
+	</style>
+</head>
+<body class="gray">
+	<div id="tab-list" class="gray">
+	</div>
+	<div class="spacer light-gray">
+		<table id="data-container">
+			<tr>
+				<th> Level </th>
+				<th> Damage <br><span> 
+						<img src="http://darksouls3.wdfiles.com/local--files/icon-page/physical_damage.png" title="physical damage">
+						<img src="http://darksouls3.wdfiles.com/local--files/icon-page/magic_damage.png" title="magic damage">
+						<img src="http://darksouls3.wdfiles.com/local--files/icon-page/fire_damage.png" title="fire damage">
+						<img src="http://darksouls3.wdfiles.com/local--files/icon-page/lightning_damage.png" title="lightning damage">
+						<img src="http://darksouls3.wdfiles.com/local--files/icon-page/dark_damage.png" class="brighter" title="dark damage">
+				</span></th>
+				<th> Aux Effects <br><span>
+						<img src="http://darksouls3.wdfiles.com/local--files/icon-page/poison_damage.png" class="brighter" title="poison damage">
+						<img src="http://darksouls3.wdfiles.com/local--files/icon-page/bleed_damage.png" class="brighter" title="bleed damage">
+						<img src="http://darksouls3.wdfiles.com/local--files/icon-page/frost_damage.png" class="brighter" title="frost damage">
+				</span></th>
+				<th> Stat Bonuses </th>
+				<th> Cost </th>
+				<th> Souls </th>
+			</tr>
+		</table>
+	</div>
+	<div class="spacer gray">
+		<div id="io-area">
+			<div class="button-container">
+				<div class="button left">▲ import</div>
+				<div class="button right">▼ export</div>
+			</div>
+			<textarea></textarea>
+		</div>
+	</div>
+
+	<script>
+		//TableEditor
+		function TableEditor() {
+			this.upgradeList = this.buildUpgradeList();
+			this.activeUpgrade = this.upgradeList[0];
+
+			this.buildDom();
+			this.updateTable();
+		}
+
+		TableEditor.prototype = {
+			buildUpgradeList: function() {
+				return [
+					new Upgrade('Physical', true),
+					new Upgrade('Heavy', true),
+					new Upgrade('Sharp', true),
+					new Upgrade('Refined', true),
+					new Upgrade('Raw', true),
+					new Upgrade('Crystal', true),
+					new Upgrade('Simple', true),
+					new Upgrade('Fire', true),
+					new Upgrade('Chaos', true),
+					new Upgrade('Lightning', true),
+					new Upgrade('Blessed', true),
+					new Upgrade('Deep', true),
+					new Upgrade('Dark', true),
+					new Upgrade('Blood', true),
+					new Upgrade('Poison', true),
+					new Upgrade('Hollow', true),
+					new Upgrade('Unique', false, 5),
+					new Upgrade('Boss', false, 5)
+				];
+			},
+
+		//BUILD
+			buildDom: function() {
+				var self = this;
+				var tabList = document.querySelector('#tab-list');
+
+				this.upgradeList.forEach(function (upgrade) {
+					var tab = self.buildTab(upgrade);
+					tabList.appendChild(tab);
+				});
+
+				tabList.firstElementChild.classList.add('active-tab');
+
+				this.buildTable();
+				this.bindTableEvents();
+
+				this.bindButtonEvent();
+			},
+
+			buildTab: function(upgrade) {
+				var self = this;
+				var div = document.createElement('div');
+				div.innerHTML = upgrade.type + '<span class="'+ (upgrade.active ? 'active' : 'disabled') +'">'+ (upgrade.active ? '✓' : '✗') +'</span>';
+				
+				div.addEventListener('click', function (e) {
+					var last = document.querySelector('.active-tab');
+
+					if (last)
+						last.classList.remove('active-tab');
+
+					div.classList.add('active-tab');
+
+					self.activeUpgrade = upgrade;
+					self.updateTable();
+					self.updateTableRows(upgrade);
+				});
+
+				div.querySelector('span').addEventListener('click', function (e) {
+					e.stopImmediatePropagation();
+					upgrade.setActive( !upgrade.active );
+				});
+
+				upgrade.setDom(div);
+				return div;
+			},
+
+			updateTableRows: function(upgrade){
+				var trList = document.querySelector('#data-container').querySelectorAll('tr');
+				console.log(trList, ', size:', upgrade.size);
+
+				for (var i=0, select; select = trList[i]; i++)
+					if (i <= upgrade.size+1)
+						select.classList.remove('hide');
+					else 
+						select.classList.add('hide');
+			},
+
+			buildTable: function() {
+				var table = document.querySelector('#data-container');
+
+				for (var i=0; i<=10; i++) {
+					var tr = document.createElement('tr');
+
+					tr.innerHTML = [
+						'<td>',
+						'	+'+ i,
+						'</td>',
+						'<td collspan="1">',
+						'	<input type="text" data-key="'+ i +'-0"> /',
+						'	<input type="text" data-key="'+ i +'-1"> /',
+						'	<input type="text" data-key="'+ i +'-2"> /',
+						'	<input type="text" data-key="'+ i +'-3"> /',
+						'	<input type="text" data-key="'+ i +'-4">',
+						'</td>',
+						'<td collspan="1">',
+						'	<input type="text" data-key="'+ i +'-5"> /',
+						'	<input type="text" data-key="'+ i +'-6"> /',
+						'	<input type="text" data-key="'+ i +'-7">',
+						'</td>',
+						'<td collspan="1">',
+						'	<select data-key="'+ i +'-8">',
+						'		<option selected value="-">-</option>',
+						'		<option value="S">S</option> <option value="A">A</option> <option value="B">B</option>',
+						'		<option value="C">C</option> <option value="D">D</option> <option value="E">E</option>',
+						'	</select> /',
+						'	<select data-key="'+ i +'-9">',
+						'		<option selected value="-">-</option>',
+						'		<option value="S">S</option> <option value="A">A</option> <option value="B">B</option>',
+						'		<option value="C">C</option> <option value="D">D</option> <option value="E">E</option>',
+						'	</select> /',
+						'	<select data-key="'+ i +'-10">',
+						'		<option selected value="-">-</option>',
+						'		<option value="S">S</option> <option value="A">A</option> <option value="B">B</option>',
+						'		<option value="C">C</option> <option value="D">D</option> <option value="E">E</option>',
+						'	</select> / ',
+						'	<select data-key="'+ i +'-11">',
+						'		<option selected value="-">-</option>',
+						'		<option value="S">S</option> <option value="A">A</option> <option value="B">B</option>',
+						'		<option value="C">C</option> <option value="D">D</option> <option value="E">E</option>',
+						'	</select>',
+						'</td>',
+						'<td collspan="1" style="color:#aaa;">',
+						'	default',
+						'</td>',
+						'<td collspan="1">',
+						'	<input type="number" data-key="'+ i +'-12" min="0" max="99999">',
+						'</td>'
+					].join('\n');
+
+					table.appendChild(tr);
+				}
+			},
+
+			bindTableEvents: function() {
+				var self = this;
+				var table = document.querySelector('#data-container');
+				var inputList = table.querySelectorAll('input');
+				var comboList = table.querySelectorAll('select');
+
+
+				for (var i=0, input; input=inputList[i]; i++) {
+					input.addEventListener('keypress', keypressEvent);
+					input.addEventListener('click', clickEvent);
+				}
+
+				function keypressEvent(e) {
+					var key = this.dataset.key.split('-').map(function (value){
+						return parseInt(value);
+					});
+					//cursor => value.slice(0,debut) + value.slice(fin);
+					e.preventDefault();
+
+					this.value = (this.value + String.fromCharCode(e.charCode)).replace(/[^0-9]/g, '');
+
+					if (this.type === 'text')
+						this.value = Math.max(0, Math.min(parseInt(this.value), 999));
+					else
+						this.value = Math.max(0, Math.min(parseInt(this.value), 99999));
+
+
+					self.activeUpgrade.getLevel(key[0]).set(key[1], this.value);
+				}
+
+				function clickEvent(e) {
+					this.value = 0;
+				}
+
+
+				for (var i=0, combo; combo=comboList[i]; i++)
+					combo.addEventListener('change', change);
+
+				function change(e) {
+					var key = this.dataset.key.split('-').map(function (value) {
+						return parseInt(value);
+					});
+
+					self.activeUpgrade.getLevel(key[0]).set(key[1], this.value);
+				}
+			},
+
+			bindButtonEvent: function() {
+				var self = this;
+
+				document.querySelector('.button.right').
+					addEventListener('click', function (e) {
+						self.exportData();
+					});
+
+				document.querySelector('.button.left').
+					addEventListener('click', function (e) {
+						self.importData();
+					});
+			},
+
+		//UPDATE
+			updateTable: function() {
+				for (var i=0, level; level=this.activeUpgrade.getLevel(i); i++)
+					for (var j=0; j<=12; j++)
+						document.querySelector('[data-key="'+ i +'-'+ j +'"]').value = level.get(j);
+			},
+
+
+			exportData: function() {
+				var result = [
+					'[[tabview]]',
+					this.upgradeList.join(''),
+					'[[/tabview]]'
+				].join('\n');
+
+				document.querySelector('textarea').value = result;
+			},
+
+			importData: function() {
+				var self = this;
+				this.upgradeList.forEach(function (upgrade) {
+					upgrade.setActive(false);
+				});
+
+
+				var data = document.querySelector('textarea').value.replace(/[\s]/g, '').match(/\[\[tabview\]\].*?\[\[\/tabview\]\]/);
+
+				this.activeUpgrade = this.upgradeList[0];
+
+				if ( !data || !data[0])
+					return;
+
+				var dataList = data[0].match(/\[\[tab[A-Z].*?\[\/tab\]\]/g);
+
+				dataList.forEach(function (upgradeData) {
+					var upgradeType = upgradeData.match(/\[\[tab.*?\]\]/)[0].replace(/\[|tab|\]| /g, '')
+
+					upgradeData = upgradeData.slice(upgradeData.indexOf('damage'));
+					upgradeData = upgradeData.slice(0, upgradeData.indexOf(']]'));
+					upgradeData = upgradeData.split('|');
+
+					upgrade = getUpgrade(upgradeType);
+					var map = {};
+
+					if (!upgrade) {
+						console.log('unexpected type:', upgradeType);
+						return;
+					}
+
+					upgrade.setActive(true);
+
+					upgradeData.forEach(function (keyValue) {
+						keyValue = keyValue.split(/=/g);
+						map[keyValue[0]] = keyValue[1];
+					});
+
+					for (var i=0; i<=upgrade.size; i++)
+						hydrateLevel(upgrade.getLevel(i), map);
+				});
+
+				this.updateTable();
+
+
+				function getUpgrade(type) {
+					for (var i=0, upgrade; upgrade=self.upgradeList[i]; i++)
+						if (upgrade.type === type)
+							return upgrade;
+
+					return null;
+				}
+
+				function hydrateLevel(level, map) {
+					var damage = (map['damage_'+ level.level]||'').split('/');
+					level.set(0, damage[0] || 0);
+					level.set(1, damage[1] || 0);
+					level.set(2, damage[2] || 0);
+					level.set(3, damage[3] || 0);
+					level.set(4, damage[4] || 0);
+
+					var aux_effects = (map['aux_effects_'+ level.level]||'').split('/');
+					level.set(5, aux_effects[0] || 0);
+					level.set(6, aux_effects[1] || 0);
+					level.set(7, aux_effects[2] || 0);
+
+					var  stat_bonuses = (map['stat_bonuses_'+ level.level]||'').split('/');
+					level.set(8, stat_bonuses[0] || '-');
+					level.set(9, stat_bonuses[1] || '-');
+					level.set(10, stat_bonuses[2] || '-');
+					level.set(11, stat_bonuses[3] || '-');
+
+					level.set(12, map['souls_'+ level.level] || 0);
+				}
+			}
+		};
+
+
+
+		//Upgrade
+		function Upgrade(type, active, size) {
+			this.type = type;
+			this.active = active;
+			this.size = size || 10;
+			this.levelList = this.buildLevelList(this.size);
+			this.dom = null;
+		}
+
+		Upgrade.prototype = {
+			buildLevelList: function(size) {
+				var result = [];
+
+				for (var i=0; i<=size; i++)
+					result.push(new LevelRow(i, this.type));
+
+				return result;
+			},
+
+			getLevel: function(index) {
+				return this.levelList[index];
+			},
+
+			getInfoboxPrefix: function() {
+				switch(this.type) {
+					case 'Unique': return 'unique-';
+					case 'Boss': return 'boss-';
+					default: return "";
+				}
+			},
+
+			toString: function() {
+				if (!this.active)
+					return '';
+
+				else
+					return [
+						'[[tab '+ this.type +']]',
+						'[[include weapon-upgrade-'+ this.type.toLowerCase() +']]',
+						'[[include upgrade-'+ this.getInfoboxPrefix() +'infobox ',
+						this.levelList.join('\n'),
+						']]',
+						'[[/tab]]'
+					].join('\n') +'\n';
+			},
+
+			setActive: function(value) {
+				this.active = (value ? true : false);
+				var span = this.dom.querySelector('span');
+
+				if (this.active) {
+					span.classList.remove('disabled');
+					span.classList.add('active');
+					span.innerHTML = '✓';
+
+				} else {
+					span.classList.remove('active');
+					span.classList.add('disabled');
+					span.innerHTML = '✗';
+				}
+			},
+
+			setDom: function(dom) {
+				this.dom = dom;
+			}
+		};
+
+
+		//UpgradeRow
+		function LevelRow(level, type) {
+			this.type = type;
+			this.level = level;
+			this.data = [
+				0, 0, 0, 0, 0,       //Damage 0-4
+				0, 0, 0,             //Aux Effects 5-7
+				'-', '-', '-', '-',  //Stat Bonuses 8-11
+				null                 //Souls 12
+			];
+		}
+
+		LevelRow.prototype = {
+			get: function(index) {
+				return this.data[index];
+			},
+
+			set: function(index, value) {
+				this.data[index] = value;
+			},
+
+			getCost: function() {
+				switch (this.type) {
+					case 'Boss': switch (this.level) {
+							case 1: return '1x Titanite Scale';
+							case 2: return '2x Titanite Scale';
+							case 3: return '4x Titanite Scale';
+							case 4: return '8x Titanite Scale';
+							case 5: return '1x Titanite Slab';
+							default: return '-';
+						}
+					break;
+					case 'Unique': switch(this.level) {
+							case 1: return '1x Twinkling Titanite';
+							case 2: return '2x Twinkling Titanite';
+							case 3: return '4x Twinkling Titanite';
+							case 4: return '8x Twinkling Titanite';
+							case 5: return '1x Titanite Slab';
+							default: return '-';
+						}
+					break;
+					default: return '-';
+				}
+			},
+
+			toString: function() {
+				var level = this.level,
+					data = this.data;
+
+				return [
+					'    damage_'+ level +' = '+ data[0] +'/'+ data[1] +'/'+ data[2] +'/'+ data[3] +'/'+ data[4] +' |',
+					'        aux_effects_'+ level +' = '+ data[5] +'/'+ data[6] +'/'+ data[7] +' |',
+					'        stat_bonuses_'+ level +' = '+ data[8] +'/'+ data[9] +'/'+ data[10] +'/'+ data[11] +' |',
+					'        cost_'+ level +' = '+ this.getCost() +' |',
+					'        souls_'+ level +' = '+ (data[12] || 0) +' |'
+				].join('\n');
+			}
+		};
+
+		//Build
+		window.tableEditor = new TableEditor();
+	</script>
+</body>
+</html>
