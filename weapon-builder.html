@@ -327,11 +327,10 @@
 			},
 
 			bindTableEvents: function() {
-				var self = this;
-				var table = document.querySelector('#data-container');
-				var inputList = table.querySelectorAll('input');
-				var comboList = table.querySelectorAll('select');
-
+				var self = this,
+					table = document.querySelector('#data-container'),
+					inputList = table.querySelectorAll('input'),
+					comboList = table.querySelectorAll('select');
 
 				for (var i=0, input; input=inputList[i]; i++) {
 					input.addEventListener('keypress', keypressEvent);
@@ -339,13 +338,18 @@
 				}
 
 				function keypressEvent(e) {
+					var index = this.selectionStart;
+
+					if(e.altKey || e.ctrlKey || e.keyCode === 0)
+						return;
+
 					var key = this.dataset.key.split('-').map(function (value){
 						return parseInt(value);
 					});
 					//cursor => value.slice(0,debut) + value.slice(fin);
 					e.preventDefault();
 
-					this.value = (this.value + String.fromCharCode(e.charCode)).replace(/[^0-9]/g, '');
+					this.value = (this.value.slice(0, this.selectionStart) + String.fromCharCode(e.charCode) + this.value.slice(this.selectionEnd)).replace(/[^0-9]/g, '');
 
 					if (this.type === 'text')
 						this.value = Math.max(0, Math.min(parseInt(this.value), 999));
@@ -354,10 +358,15 @@
 
 
 					self.activeUpgrade.getLevel(key[0]).set(key[1], this.value);
+
+					console.log(index);
+					this.selectionStart = index+1;
+					this.selectionEnd = index+1;
 				}
 
 				function clickEvent(e) {
-					this.value = 0;
+					this.selectionStart = 0;
+					this.selectionEnd = this.value.length;
 				}
 
 
