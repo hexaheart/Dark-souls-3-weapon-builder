@@ -13,10 +13,11 @@
 		input{
 			border: none;
 			text-align: center;
+			width: 25px;
 		}
 
-		input[type=text]{
-			width: 25px;
+		input.souls {
+			width: 60px;
 		}
 
 		td, th{
@@ -31,7 +32,7 @@
 
 		.brighter{
 			-webkit-filter: brightness(180%) contrast(80%);
-			filter:brightness(180%) contrast(80%);
+			filter: brightness(180%) contrast(80%);
 		}
 
 		#tab-list{
@@ -318,7 +319,7 @@
 						'	default',
 						'</td>',
 						'<td collspan="1">',
-						'	<input type="number" data-key="'+ i +'-12" min="0" max="99999">',
+						'	<input type="text" data-key="'+ i +'-12" class="souls">',
 						'</td>'
 					].join('\n');
 
@@ -334,32 +335,36 @@
 
 				for (var i=0, input; input=inputList[i]; i++) {
 					input.addEventListener('keypress', keypressEvent);
-					input.addEventListener('click', clickEvent);
+
+					if (input.type === 'text')
+						input.addEventListener('click', clickEvent);
 				}
 
 				function keypressEvent(e) {
 					var index = this.selectionStart;
-
+					
 					if(e.altKey || e.ctrlKey || e.keyCode === 0)
 						return;
 
 					var key = this.dataset.key.split('-').map(function (value){
 						return parseInt(value);
 					});
+
+
 					//cursor => value.slice(0,debut) + value.slice(fin);
 					e.preventDefault();
 
 					this.value = (this.value.slice(0, this.selectionStart) + String.fromCharCode(e.charCode) + this.value.slice(this.selectionEnd)).replace(/[^0-9]/g, '');
 
-					if (this.type === 'text')
-						this.value = Math.max(0, Math.min(parseInt(this.value), 999));
-					else
-						this.value = Math.max(0, Math.min(parseInt(this.value), 99999));
 
+					var max = 999;
+					if (key[1] === 12)
+						max = 99999;
+
+					this.value = Math.max(0, Math.min(parseInt(this.value), max));
 
 					self.activeUpgrade.getLevel(key[0]).set(key[1], this.value);
 
-					console.log(index);
 					this.selectionStart = index+1;
 					this.selectionEnd = index+1;
 				}
